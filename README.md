@@ -1,4 +1,4 @@
-# Calibrate camera with arUco markers using oopencv and python. 
+# Calibrate camera with arUco markers using opencv and python. 
 (Code developed and tested on opencv 3.3.1)
 
 
