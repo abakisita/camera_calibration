@@ -1,21 +1,15 @@
-
-
 """
 This code assumes that images used for calibration are of the same arUco marker board provided with code
 
 """
-
-
 
 import cv2
 from cv2 import aruco
 import yaml
 import numpy as np
 
-
-
 # Set this flsg True for calibrating camera and False for validating results real time
-Calibrate_camera = False
+calibrate_camera = False
 
 # Set number of images taken using data_generation script.
 numberOfImages = 41
@@ -24,11 +18,7 @@ numberOfImages = 41
 path = "/home/abhishek/stuff/object_detection/explore/aruco_data/"
 
 # For validating results, show aruco board to camera.
-
-
-
 aruco_dict = aruco.getPredefinedDictionary( aruco.DICT_6X6_1000 )
-
 
 #Provide length of the marker's side
 markerLength = 3.75  # Here, measurement unit is centimetre.
@@ -36,23 +26,16 @@ markerLength = 3.75  # Here, measurement unit is centimetre.
 # Provide separation between markers
 markerSeparation = 0.5   # Here, measurement unit is centimetre.
 
-
-
 # create arUco board
 board = aruco.GridBoard_create(4, 5, markerLength, markerSeparation, aruco_dict)
-
 
 '''uncomment following block to draw and show the board'''
 #img = board.draw((864,1080))
 #cv2.imshow("aruco", img)
 
-
-
-
 arucoParams = aruco.DetectorParameters_create()
 
-if Calibrate_camera == True:
-    
+if calibrate_camera == True:
     img_list = []
     i = 0
     while i < numberOfImages:
@@ -68,7 +51,6 @@ if Calibrate_camera == True:
     id_list = []
     first = True
     for im in img_list:
-    
         img_gray = cv2.cvtColor(im,cv2.COLOR_RGB2GRAY)
         corners, ids, rejectedImgPoints = aruco.detectMarkers(img_gray, aruco_dict, parameters=arucoParams)
         if first == True:
@@ -90,13 +72,10 @@ if Calibrate_camera == True:
     data = {'camera_matrix': np.asarray(mtx).tolist(), 'dist_coeff': np.asarray(dist).tolist()}
     with open("calibration.yaml", "w") as f:
         yaml.dump(data, f)
-    
 
-else :
-
+else:
     camera = cv2.VideoCapture(0)
     ret, img = camera.read()
-
 
     with open('calibration.yaml') as f:
         loadeddict = yaml.load(f)
@@ -109,8 +88,6 @@ else :
     img_gray = cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
     h,  w = img_gray.shape[:2]
     newcameramtx, roi=cv2.getOptimalNewCameraMatrix(mtx,dist,(w,h),1,(w,h))
-
-
 
     pose_r = []
     pose_t = []
@@ -133,14 +110,8 @@ else :
                 img_aruco = aruco.drawDetectedMarkers(img, corners, ids, (0,255,0))
                 img_aruco = aruco.drawAxis(img_aruco, newcameramtx, dist, rvec, tvec, 10)    # axis length 100 can be changed according to your requirement
 
-
             if cv2.waitKey(0) & 0xFF == ord('q'):
-
                 break;
         cv2.imshow("World co-ordinate frame axes", img_aruco)
-
-
-
-
 
 cv2.destroyAllWindows()
