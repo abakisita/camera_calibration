@@ -15,7 +15,7 @@ import numpy as np
 
 
 # Set this flsg True for calibrating camera and False for validating results real time
-Calibrate_camera = False
+calibrate_camera = False
 
 # Set number of images taken using data_generation script.
 numberOfImages = 41
@@ -24,9 +24,6 @@ numberOfImages = 41
 path = "/home/abhishek/stuff/object_detection/explore/aruco_data/"
 
 # For validating results, show aruco board to camera.
-
-
-
 aruco_dict = aruco.getPredefinedDictionary( aruco.DICT_6X6_1000 )
 
 
