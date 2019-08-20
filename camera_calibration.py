@@ -7,15 +7,17 @@ import cv2
 from cv2 import aruco
 import yaml
 import numpy as np
+from pathlib import Path
+from tqdm import tqdm
+
+# root directory of repo for relative path specification.
+root = Path(__file__).parent.absolute()
 
 # Set this flsg True for calibrating camera and False for validating results real time
-calibrate_camera = False
-
-# Set number of images taken using data_generation script.
-numberOfImages = 41
+calibrate_camera = True
 
 # Set path to the images
-path = "/home/abhishek/stuff/object_detection/explore/aruco_data/"
+calib_imgs_path = root.joinpath("aruco_data")
 
 # For validating results, show aruco board to camera.
 aruco_dict = aruco.getPredefinedDictionary( aruco.DICT_6X6_1000 )
@@ -37,32 +39,30 @@ arucoParams = aruco.DetectorParameters_create()
 
 if calibrate_camera == True:
     img_list = []
-    i = 0
-    while i < numberOfImages:
-    
-        name = "aruco_data/" + str(i) + ".jpg"
-        img = cv2.imread(name)
-        img_list.append(img)
+    calib_fnms = calib_imgs_path.glob('*.jpg')
+    print('Using ...', end='')
+    for idx, fn in enumerate(calib_fnms):
+        print(idx, '', end='')
+        img = cv2.imread( str(root.joinpath(fn) ))
+        img_list.append( img )
         h, w, c = img.shape
-        i += 1
+    print('Calibration images')
 
-    counter = []
-    corners_list = []
-    id_list = []
+    counter, corners_list, id_list = [], [], []
     first = True
-    for im in img_list:
+    for im in tqdm(img_list):
         img_gray = cv2.cvtColor(im,cv2.COLOR_RGB2GRAY)
         corners, ids, rejectedImgPoints = aruco.detectMarkers(img_gray, aruco_dict, parameters=arucoParams)
         if first == True:
             corners_list = corners
-            print(type(corners))
             id_list = ids
             first = False
         else:
             corners_list = np.vstack((corners_list, corners))
             id_list = np.vstack((id_list,ids))
         counter.append(len(ids))
-    
+    print('Found {} unique markers'.format(np.unique(ids)))
+
     counter = np.array(counter)
     print ("Calibrating camera .... Please wait...")
     #mat = np.zeros((3,3), float)
@@ -89,9 +89,7 @@ else:
     h,  w = img_gray.shape[:2]
     newcameramtx, roi=cv2.getOptimalNewCameraMatrix(mtx,dist,(w,h),1,(w,h))
 
-    pose_r = []
-    pose_t = []
-    count = 0
+    pose_r, pose_t = [], []
     while True:
         ret, img = camera.read()
         img_aruco = img
