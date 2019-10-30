@@ -30,8 +30,6 @@ def main(data_dir):
     counter = 0
     while True:
         name = os.path.join(data_dir, str(counter)+".jpg")
-        # for i in range(4):
-        #     camera.grab()
         ret, img = camera.read()
         cv2.imshow("img", img)
 
