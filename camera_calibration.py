@@ -29,19 +29,20 @@ markerLength = 3.75  # Here, measurement unit is centimetre.
 markerSeparation = 0.5   # Here, measurement unit is centimetre.
 
 # create arUco board
-board = aruco.GridBoard_create(4, 5, markerLength, markerSeparation, aruco_dict)
+board = aruco.GridBoard((4, 5), markerLength, markerSeparation, aruco_dict)
 
 '''uncomment following block to draw and show the board'''
 #img = board.draw((864,1080))
 #cv2.imshow("aruco", img)
 
-arucoParams = aruco.DetectorParameters_create()
+arucoParams = aruco.DetectorParameters()
 
 if calibrate_camera == True:
     img_list = []
     calib_fnms = calib_imgs_path.glob('*.jpg')
+    fns = list(calib_fnms)
     print('Using ...', end='')
-    for idx, fn in enumerate(calib_fnms):
+    for idx, fn in enumerate(fns):
         print(idx, '', end='')
         img = cv2.imread( str(root.joinpath(fn) ))
         img_list.append( img )
@@ -50,10 +51,11 @@ if calibrate_camera == True:
 
     counter, corners_list, id_list = [], [], []
     first = True
-    for im in tqdm(img_list):
+    for idx, im in enumerate(tqdm(img_list)):
+        print(f"Calibrating on {idx} {fns[idx]}")
         img_gray = cv2.cvtColor(im,cv2.COLOR_RGB2GRAY)
         corners, ids, rejectedImgPoints = aruco.detectMarkers(img_gray, aruco_dict, parameters=arucoParams)
-        if first == True:
+        if first:
             corners_list = corners
             id_list = ids
             first = False
